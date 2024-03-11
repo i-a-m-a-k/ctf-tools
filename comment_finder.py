@@ -6,6 +6,7 @@ TIMEOUT = []
 
 RE_SCRIPT = re.compile(r'<script[\s\S]*</script>')
 RE_STYLE = re.compile(r'<style[\s\S]*</style>')
+RE_LINK = re.compile(r'<link[\s\S]*rel=["\']stylesheet["\'][\s\S]*</link?')
 
 RE_JS_M = re.compile(r'/\*[\s\S]*?\*/')
 RE_JS_S = re.compile(r'//[^\n]')
@@ -44,7 +45,8 @@ def process_url(url:str)->None:
 
 	# Get other links in the page
 	scripts = [get_url_from_tag(x, url) for x in RE_SCRIPT.findall(text)]
-	styles =  [get_url_from_tag(x, url) for x in RE_STYLE.findall(text)]
+	styles = [get_url_from_tag(x, url) for x in RE_STYLE.findall(text)]
+	links = [get_url_from_tg(x, url) for x in RE_LINK.findall(text)]
 	urls = [get_url_from_tag(x, url) for x in RE_URLS.findall(text)]
 	
 	urls_to_visit = scripts + styles + urls
@@ -71,6 +73,8 @@ def rel_to_abs(url, parent_url):
 		return parent_url + url[1:]
 	elif url.startswith('/'):
 		return parent_url + url
+	elif not url.startswith('http'):
+		return parent_url + '/' + url
 	return url
 
 if __name__ == '__main__':
